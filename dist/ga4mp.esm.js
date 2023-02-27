@@ -397,7 +397,9 @@ const ga4mp = function (measurement_ids, config = {}) {
      * @param {object} customEventParameters
      */
     const buildPayload = (eventName, customEventParameters) => {
-        console.log("DAVID",eventName,  customEventParameters);
+        if(internalModel.debug){
+          console.log("DAVID",eventName,  customEventParameters);
+        }
         const payload = {};
         if (internalModel.payloadData.hit_count === 1)
             internalModel.payloadData.session_engaged = 1;

@@ -364,7 +364,9 @@
      * @param {object} customEventParameters
      */
     var buildPayload = function buildPayload(eventName, customEventParameters) {
-      console.log("DAVID", eventName, customEventParameters);
+      if (internalModel.debug) {
+        console.log("DAVID", eventName, customEventParameters);
+      }
       var payload = {};
       if (internalModel.payloadData.hit_count === 1) internalModel.payloadData.session_engaged = 1;
       Object.entries(internalModel.payloadData).forEach(function (pair) {
@@ -384,27 +386,28 @@
         if (key === 'items' && ecommerceEvents.indexOf(eventName) > -1 && Array.isArray(value)) {
           // only 200 items per event
           var items = value.slice(0, 200);
-          for (var i = 0; i < items.length; i++) {
+          var _loop = function _loop() {
             if (items[i]) {
-              (function () {
-                var item = {
-                  core: {},
-                  custom: {}
-                };
-                Object.entries(items[i]).forEach(function (pair) {
-                  if (ga4Schema[pair[0]]) {
-                    if (typeof pair[1] !== 'undefined') item.core[ga4Schema[pair[0]]] = pair[1];
-                  } else item.custom[pair[0]] = pair[1];
-                });
-                var productString = Object.entries(item.core).map(function (v) {
-                  return v[0] + v[1];
-                }).join('~') + '~' + Object.entries(item.custom).map(function (v, i) {
-                  var customItemParamIndex = 10 > i ? '' + i : String.fromCharCode(65 + i - 10);
-                  return "k".concat(customItemParamIndex).concat(v[0], "~v").concat(customItemParamIndex).concat(v[1]);
-                }).join('~');
-                payload["pr".concat(i + 1)] = productString;
-              })();
+              var item = {
+                core: {},
+                custom: {}
+              };
+              Object.entries(items[i]).forEach(function (pair) {
+                if (ga4Schema[pair[0]]) {
+                  if (typeof pair[1] !== 'undefined') item.core[ga4Schema[pair[0]]] = pair[1];
+                } else item.custom[pair[0]] = pair[1];
+              });
+              var productString = Object.entries(item.core).map(function (v) {
+                return v[0] + v[1];
+              }).join('~') + '~' + Object.entries(item.custom).map(function (v, i) {
+                var customItemParamIndex = 10 > i ? '' + i : String.fromCharCode(65 + i - 10);
+                return "k".concat(customItemParamIndex).concat(v[0], "~v").concat(customItemParamIndex).concat(v[1]);
+              }).join('~');
+              payload["pr".concat(i + 1)] = productString;
             }
+          };
+          for (var i = 0; i < items.length; i++) {
+            _loop();
           }
         } else {
           if (ga4Schema[key]) {
